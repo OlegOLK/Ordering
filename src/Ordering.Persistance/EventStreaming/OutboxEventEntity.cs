@@ -78,6 +78,14 @@ namespace Ordering.Persistance.EventStreaming
         public DateTime CreatedOn { get; set; }
 
         /// <summary>
+        /// Gets or sets the processed on.
+        /// </summary>
+        /// <value>
+        /// The processed on.
+        /// </value>
+        public DateTime? ProcessedOn { get; set; }
+
+        /// <summary>
         /// Gets or sets the error message.
         /// </summary>
         /// <value>

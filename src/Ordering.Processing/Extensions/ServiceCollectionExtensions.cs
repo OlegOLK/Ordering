@@ -5,6 +5,8 @@ using Ordering.Domain.Messaging.Messages;
 using Ordering.Messaging.RabbitMq;
 using Ordering.Processing.Consumers;
 using Ordering.Processing.Processors;
+using Ordering.Processing.Services;
+using Ordering.Processing.Workers;
 
 namespace Ordering.Processing.Extensions;
 
@@ -21,7 +23,18 @@ public static class ServiceCollectionExtensions
     /// <returns></returns>
     public static IServiceCollection RegisterProcessingDependencies(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddHostedService<RetryFailedOrdersWorker>();
+
+        services.AddOptions<BackgroundServiceConfiguration>()
+         .Configure<IConfiguration>((options, cfg) =>
+         {
+             cfg.GetSection(BackgroundServiceConfiguration.ConfigurationSection).Bind(options);
+         })
+         .ValidateDataAnnotations()
+         .ValidateOnStart();
+
         services.AddTransient<IConsumer<CreateOrderMessage>, CreateOrderMessageConsumer>();
+        services.AddTransient<ICreateOrderProcessingService, CreateOrderMessageConsumer>();
         services.AddSingleton(new RoutingConsumer
         {
             Consumer = typeof(CreateOrderMessageConsumer),

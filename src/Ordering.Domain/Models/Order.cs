@@ -81,4 +81,20 @@ public class Order : Entity
 
         _items.Add(orderItem);
     }
+
+    /// <summary>
+    /// Sets as failed.
+    /// </summary>
+    public void SetAsFailed()
+    {
+        Status = OrderStatus.Failed;
+    }
+
+    /// <summary>
+    /// Sets as processed.
+    /// </summary>
+    public void SetAsProcessed()
+    {
+        Status = OrderStatus.Processed;
+    }
 }

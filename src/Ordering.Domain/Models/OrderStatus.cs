@@ -14,22 +14,17 @@ public enum OrderStatus
     Created = 1,
 
     /// <summary>
-    /// The validated
-    /// </summary>
-    Validated = 10,
-
-    /// <summary>
-    /// The enriched
-    /// </summary>
-    Enriched = 20,
-
-    /// <summary>
     /// The processed
     /// </summary>
-    Processed = 30,
+    Processed = 10,
 
     /// <summary>
     /// The cancelled
     /// </summary>
     Cancelled = 40,
+
+    /// <summary>
+    /// The failed
+    /// </summary>
+    Failed = 50
 }

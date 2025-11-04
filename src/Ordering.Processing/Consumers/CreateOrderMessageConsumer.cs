@@ -1,11 +1,14 @@
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Ordering.Domain.Eventing;
 using Ordering.Domain.Messaging.Messages;
+using Ordering.Domain.Models;
 using Ordering.Persistance.EventStreaming;
 using Ordering.Persistance.Repositories;
 using Ordering.Processing.Exceptions;
 using Ordering.Processing.Processors;
+using Ordering.Processing.Services;
 using System.Diagnostics.Metrics;
 
 namespace Ordering.Processing.Consumers;
@@ -14,7 +17,7 @@ namespace Ordering.Processing.Consumers;
 /// CreateOrderMessageConsumer
 /// </summary>
 /// <seealso cref="MassTransit.IConsumer&lt;Ordering.Domain.Messaging.Messages.CreateOrderMessage&gt;" />
-public class CreateOrderMessageConsumer : IConsumer<CreateOrderMessage>
+public class CreateOrderMessageConsumer : IConsumer<CreateOrderMessage>, ICreateOrderProcessingService
 {
     /// <summary>
     /// The meter
@@ -43,6 +46,12 @@ public class CreateOrderMessageConsumer : IConsumer<CreateOrderMessage>
     /// The outbox event repository
     /// </summary>
     private readonly IOutboxEventRepository _outboxEventRepository;
+
+    /// <summary>
+    /// The order repository
+    /// </summary>
+    private readonly IOrderRepository _orderRepository;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="CreateOrderMessageConsumer"/> class.
     /// </summary>
@@ -52,11 +61,13 @@ public class CreateOrderMessageConsumer : IConsumer<CreateOrderMessage>
     public CreateOrderMessageConsumer(
         ILogger<CreateOrderMessageConsumer> logger,
         IEnumerable<IProcessor> processors,
+        IOrderRepository orderRepository,
         IOutboxEventRepository outboxEventRepository)
     {
         _logger = logger;
         _processors = processors;
         _outboxEventRepository = outboxEventRepository;
+        _orderRepository = orderRepository;
     }
 
     /// <summary>
@@ -65,11 +76,23 @@ public class CreateOrderMessageConsumer : IConsumer<CreateOrderMessage>
     /// <param name="context">The context.</param>
     public async Task Consume(ConsumeContext<CreateOrderMessage> context)
     {
+        await ProcessMessage(context.Message);
+    }
+
+    /// <summary>
+    /// Processes the message.
+    /// </summary>
+    /// <param name="message">The message.</param>
+    public async Task ProcessMessage(CreateOrderMessage message)
+    {
         ProcessingContext ctx = new ProcessingContext
         {
-            OrderId = context.Message.OrderId,
-            TransactionId = context.Message.Id
+            OrderId = message.OrderId,
+            EventId = message.Id
         };
+
+        _logger.LogInformation("Start processing message with event id {EventId} for order id {OrderId}", ctx.EventId, ctx.OrderId);
+
         HashSet<IProcessor> completedSteps = new HashSet<IProcessor>();
         string error = string.Empty;
         EventState state = EventState.Completed;
@@ -101,10 +124,24 @@ public class CreateOrderMessageConsumer : IConsumer<CreateOrderMessage>
             OrdersProcessed.Add(1);
         }
 
-        OutboxEventEntity eventEntity = _outboxEventRepository.GetAll().Where(x => x.Id == context.Message.EventId).Single();
+        OutboxEventEntity eventEntity = _outboxEventRepository.GetAll().Where(x => x.Id == message.EventId).Single();
         eventEntity.ErrorMessage = error;
         eventEntity.RetryCount += retry;
         eventEntity.EventState = state;
+        eventEntity.ProcessedOn = DateTime.UtcNow;
+
+        Order order = _orderRepository.GetOrders().Where(x => x.Id == message.OrderId).Single();
+
+        if (state == EventState.Failed)
+        {
+            order.SetAsFailed();
+        }
+        else
+        {
+            order.SetAsProcessed();
+        }
+
+        _logger.LogInformation("End processing message with event id {EventId} for order id {OrderId} with status {ProcessingStatus}", ctx.EventId, ctx.OrderId, state);
 
         await _outboxEventRepository.UnitOfWork.SaveEntitiesAsync();
     }
