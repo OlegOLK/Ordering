@@ -2,7 +2,9 @@ using Cortex.Mediator.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Ordering.Application.Behaviors;
+using Ordering.Application.Eventing.Services;
 using Ordering.Application.Services;
+using Ordering.Domain.Eventing.Services;
 using Ordering.Domain.Services;
 
 namespace Ordering.Application.Extensions
@@ -21,6 +23,7 @@ namespace Ordering.Application.Extensions
         public static IServiceCollection RegisterApplicationDependencies(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddTransient<IOrderingService, OrderingService>();
+            services.AddTransient<IEventPublishingService, EventPublishingService>();
 
             services.AddCortexMediator(
                 configuration,

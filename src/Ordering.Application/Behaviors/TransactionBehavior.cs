@@ -2,6 +2,7 @@ using Cortex.Mediator.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
+using Ordering.Domain.Eventing.Services;
 using Ordering.Persistance;
 
 namespace Ordering.Application.Behaviors
@@ -19,20 +20,30 @@ namespace Ordering.Application.Behaviors
         /// The database context
         /// </summary>
         private readonly IDbContext _dbContext;
+
         /// <summary>
         /// The logger
         /// </summary>
         private readonly ILogger<TransactionBehavior<TRequest, TResponse>> _logger;
 
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactionBehavior{TRequest, TResponse}"/> class.
+        /// The event publishing service
         /// </summary>
+        private readonly IEventPublishingService _eventPublishingService;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TransactionBehavior{TRequest, TResponse}" /> class.
+        /// </summary>
+        /// <param name="eventPublishingService">The event publishing service.</param>
         /// <param name="dbContext">The database context.</param>
         /// <param name="logger">The logger.</param>
         public TransactionBehavior(
+            IEventPublishingService eventPublishingService,
             IDbContext dbContext,
             ILogger<TransactionBehavior<TRequest, TResponse>> logger)
         {
+            _eventPublishingService = eventPublishingService;
             _dbContext = dbContext;
             _logger = logger;
         }
@@ -60,6 +71,8 @@ namespace Ordering.Application.Behaviors
                     await _dbContext.UnitOfWork.CommitTransactionAsync(transaction);
                     transactionId = transaction.TransactionId;
                 }
+
+                await _eventPublishingService.PropagateEvent(transactionId);
             });
 
             return response;

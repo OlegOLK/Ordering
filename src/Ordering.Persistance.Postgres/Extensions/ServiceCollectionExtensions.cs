@@ -22,6 +22,7 @@ public static class ServiceCollectionExtensions
         IConfiguration configuration)
     {
         services.AddTransient<IOrderRepository, OrderRepository>();
+        services.AddTransient<IOutboxEventRepository, OutboxEventRepository>();
 
         services.AddOptions<PostgresDbConfiguration>()
            .Configure<IConfiguration>((options, cfg) =>

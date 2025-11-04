@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Ordering.Domain.Models;
 using Ordering.Persistance;
+using Ordering.Persistance.EventStreaming;
 using Ordering.Persistance.Postgres.EntityConfigurations;
 using System.Data;
 
@@ -30,6 +31,14 @@ public class OrderContext : DbContext, IUnitOfWork, IDbContext
     public DbSet<OrderItem> OrderItems { get; set; }
 
     /// <summary>
+    /// Gets or sets the outbox events.
+    /// </summary>
+    /// <value>
+    /// The outbox events.
+    /// </value>
+    public DbSet<OutboxEventEntity> OutboxEvents { get; set; }
+
+    /// <summary>
     /// Gets the unit of work.
     /// </summary>
     /// <value>
@@ -54,7 +63,7 @@ public class OrderContext : DbContext, IUnitOfWork, IDbContext
     /// Gets the current transaction.
     /// </summary>
     /// <returns></returns>
-    public IDbContextTransaction? GetCurrentTransaction() => _currentTransaction;
+    public IDbContextTransaction? GetContextTransaction() => _currentTransaction;
 
     /// <summary>
     /// Override this method to further configure the model that was discovered by convention from the entity types

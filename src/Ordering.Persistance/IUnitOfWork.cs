@@ -9,6 +9,12 @@ namespace Ordering.Persistance;
 public interface IUnitOfWork : IDisposable
 {
     /// <summary>
+    /// Gets the context transaction.
+    /// </summary>
+    /// <returns></returns>
+    IDbContextTransaction? GetContextTransaction();
+
+    /// <summary>
     /// Begins the transaction asynchronous.
     /// </summary>
     /// <param name="cancellation">The cancellation.</param>
