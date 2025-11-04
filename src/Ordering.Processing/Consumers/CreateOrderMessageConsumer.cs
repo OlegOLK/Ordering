@@ -143,6 +143,6 @@ public class CreateOrderMessageConsumer : IConsumer<CreateOrderMessage>, ICreate
 
         _logger.LogInformation("End processing message with event id {EventId} for order id {OrderId} with status {ProcessingStatus}", ctx.EventId, ctx.OrderId, state);
 
-        await _outboxEventRepository.UnitOfWork.SaveEntitiesAsync();
+        await _outboxEventRepository.UnitOfWork.SaveChangesAsync();
     }
 }

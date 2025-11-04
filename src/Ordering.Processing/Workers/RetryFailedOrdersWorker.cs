@@ -99,7 +99,16 @@ public class RetryFailedOrdersWorker : BackgroundService
         {
             OutboxEvent @event = JsonSerializer.Deserialize<OutboxEvent>(item.Content)!;
 
-            await processingService.ProcessMessage(new CreateOrderMessage(@event.OrderId, @event.Id));
+            try
+            {
+                await processingService.ProcessMessage(new CreateOrderMessage(@event.OrderId, @event.Id));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected exception durng message processing for Order Id {OrderId}", @event.OrderId);
+                continue;
+            }
+           
         }
     }
 }

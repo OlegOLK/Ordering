@@ -41,12 +41,12 @@ public static class ServiceCollectionExtensions
                 b => b.MigrationsAssembly(pgConfiguration.MigrationAssembly));
         });
 
-        services.AddTransient<IUnitOfWork>(sp =>
+        services.AddScoped<IUnitOfWork>(sp =>
         {
             return sp.GetRequiredService<OrderContext>();
         });
 
-        services.AddTransient<IDbContext>(sp =>
+        services.AddScoped<IDbContext>(sp =>
         {
             return sp.GetRequiredService<OrderContext>();
         });
