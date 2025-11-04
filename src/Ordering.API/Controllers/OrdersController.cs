@@ -1,3 +1,5 @@
+using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Ordering.API.Models.Input;
 using Ordering.API.Models.Output;
@@ -36,10 +38,17 @@ public class OrdersController : ControllerBase
     /// <returns></returns>
     [HttpPost]
     public async Task<IResult> PostOrder(
+        [FromServices] IValidator<OrderInput> validator,
         [FromServices] IOrderingService orderingService,
         [FromBody] OrderInput order,
         CancellationToken cancellationToken)
     {
+        ValidationResult validationResult = validator.Validate(order);
+        if (!validationResult.IsValid)
+        {
+            return TypedResults.BadRequest(validationResult);
+        }
+
         int orderId = await orderingService.CreateOrder(order.ToDomainModel(), cancellationToken);
 
         if (orderId >= 0)

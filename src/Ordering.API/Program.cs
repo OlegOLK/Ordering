@@ -1,3 +1,4 @@
+using Ordering.API.Extensions;
 using Ordering.Application.Extensions;
 using Ordering.Persistance.Postgres.Extensions;
 
@@ -11,6 +12,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services
+    .RegisterApiDependencies()
     .RegisterApplicationDependencies(builder.Configuration)
     .RegisterPostgresDependencies(builder.Configuration);
 
