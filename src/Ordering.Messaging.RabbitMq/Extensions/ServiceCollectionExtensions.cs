@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Ordering.Domain.Messaging.Messages;
 using Ordering.Domain.Messaging.Services;
+using RabbitMQ.Client;
 
 namespace Ordering.Messaging.RabbitMq.Extensions;
 
@@ -31,6 +32,7 @@ public static class ServiceCollectionExtensions
             .ValidateOnStart();
 
         RabbitMqConfiguration rabbitMqConfiguration = configuration.GetSection(RabbitMqConfiguration.ConfigurationSection).Get<RabbitMqConfiguration>()!;
+
         services.AddMassTransit(x =>
         {
             List<ServiceDescriptor> descriptors = services
@@ -69,5 +71,17 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IMessageService<CreateOrderMessage>, RabbitMqMessageService>();
 
         return services;
+    }
+
+
+    /// <summary>
+    /// Registers the health check.
+    /// </summary>
+    /// <param name="builder">The builder.</param>
+    /// <returns></returns>
+    public static IHealthChecksBuilder RegisterMessagingHealthCheck(this IHealthChecksBuilder builder)
+    {
+        // Since MT adds it automatically
+        return builder;
     }
 }

@@ -51,7 +51,23 @@ public static class ServiceCollectionExtensions
             return sp.GetRequiredService<OrderContext>();
         });
 
-
         return services;
+    }
+
+    /// <summary>
+    /// Registers the health check.
+    /// </summary>
+    /// <param name="builder">The builder.</param>
+    /// <returns></returns>
+    public static IHealthChecksBuilder RegisterPersisntanceHealthCheck(this IHealthChecksBuilder builder)
+    {
+        builder.AddNpgSql(sp =>
+        {
+            PostgresDbConfiguration configuration = sp.GetRequiredService<IOptions<PostgresDbConfiguration>>().Value;
+
+            return configuration.ConnectionString;
+        });
+
+        return builder;
     }
 }

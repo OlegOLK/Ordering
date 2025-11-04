@@ -1,4 +1,5 @@
 using FluentValidation;
+using HealthChecks.ApplicationStatus.DependencyInjection;
 using Ordering.API.Models.Input;
 using Ordering.API.Validators.Input;
 
@@ -20,5 +21,17 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IValidator<OrderItemInput>, OrderItemInputValidator>();
 
         return services;
+    }
+
+    /// <summary>
+    /// Registers the health check.
+    /// </summary>
+    /// <param name="builder">The builder.</param>
+    /// <returns></returns>
+    public static IHealthChecksBuilder RegisterApiHealthCheck(this IHealthChecksBuilder builder)
+    {
+        builder.AddApplicationStatus();
+
+        return builder;
     }
 }

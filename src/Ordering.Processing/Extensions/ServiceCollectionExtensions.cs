@@ -6,11 +6,20 @@ using Ordering.Messaging.RabbitMq;
 using Ordering.Processing.Consumers;
 using Ordering.Processing.Processors;
 
-namespace Ordering.Processing;
+namespace Ordering.Processing.Extensions;
 
-public static class E
+/// <summary>
+/// ServiceCollectionExtensions
+/// </summary>
+public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddWOrker(this IServiceCollection services, IConfiguration configuration)
+    /// <summary>
+    /// Registers the processing dependencies.
+    /// </summary>
+    /// <param name="services">The services.</param>
+    /// <param name="configuration">The configuration.</param>
+    /// <returns></returns>
+    public static IServiceCollection RegisterProcessingDependencies(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddTransient<IConsumer<CreateOrderMessage>, CreateOrderMessageConsumer>();
         services.AddSingleton(new RoutingConsumer
