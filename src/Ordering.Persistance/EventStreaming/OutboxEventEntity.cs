@@ -15,10 +15,11 @@ namespace Ordering.Persistance.EventStreaming
         /// </value>
         public Guid Id { get; private set; }
 
+        /// <summary>
+        /// Prevents a default instance of the <see cref="OutboxEventEntity"/> class from being created.
+        /// </summary>
         private OutboxEventEntity()
-        {
-            
-        }
+        { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OutboxEventEntity"/> class.
@@ -75,5 +76,13 @@ namespace Ordering.Persistance.EventStreaming
         /// The created on.
         /// </value>
         public DateTime CreatedOn { get; set; }
+
+        /// <summary>
+        /// Gets or sets the error message.
+        /// </summary>
+        /// <value>
+        /// The error message.
+        /// </value>
+        public string? ErrorMessage { get; set; }
     }
 }

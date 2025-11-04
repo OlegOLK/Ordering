@@ -27,6 +27,7 @@
     <ProjectReference Include="..\Ordering.Application\Ordering.Application.csproj" />
     <ProjectReference Include="..\Ordering.Messaging.RabbitMq\Ordering.Messaging.RabbitMq.csproj" />
     <ProjectReference Include="..\Ordering.Persistance.Postgres\Ordering.Persistance.Postgres.csproj" />
+    <ProjectReference Include="..\Ordering.Processing\Ordering.Processing.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,8 +1,11 @@
 using Cortex.Mediator;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Ordering.Application.Commands;
 using Ordering.Domain.Models;
 using Ordering.Domain.Services;
+using Ordering.Persistance.Repositories;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Ordering.Application.Services;
 
@@ -23,14 +26,21 @@ internal class OrderingService : IOrderingService
     private readonly IMediator _mediator;
 
     /// <summary>
+    /// The order repository
+    /// </summary>
+    private readonly IOrderRepository _orderRepository;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="OrderingService" /> class.
     /// </summary>
     /// <param name="logger">The logger.</param>
     /// <param name="mediator">The mediator.</param>
     public OrderingService(
+        IOrderRepository orderRepository,
         ILogger<OrderingService> logger,
         IMediator mediator)
     {
+        _orderRepository = orderRepository;
         _logger = logger;
         _mediator = mediator;
     }
@@ -44,8 +54,20 @@ internal class OrderingService : IOrderingService
     public async Task<int> CreateOrder(Order order, CancellationToken cancellationToken)
     {
         var cmd = new CreateOrderCommand(order.CustomerId, order.Items);
-        int orderId = await _mediator.SendCommandAsync<CreateOrderCommand, int>(cmd, CancellationToken.None);
+        int orderId = await _mediator.SendCommandAsync<CreateOrderCommand, int>(cmd, cancellationToken);
 
         return orderId;
+    }
+
+    public async Task<Order> GetOrder(int orderId, CancellationToken cancellationToken)
+    {
+        Order order = await _orderRepository
+               .GetOrders()
+               .AsNoTracking()
+               .Include(x => x.Items)
+               .Where(x => x.Id == orderId)
+               .SingleAsync();
+
+        return order;
     }
 }

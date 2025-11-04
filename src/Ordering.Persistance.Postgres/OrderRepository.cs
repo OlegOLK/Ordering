@@ -41,4 +41,13 @@ internal class OrderRepository : IOrderRepository
     {
         return _orderContext.Orders.Add(order).Entity;
     }
+
+    /// <summary>
+    /// Gets the orders.
+    /// </summary>
+    /// <returns></returns>
+    public IQueryable<Order> GetOrders()
+    {
+        return _orderContext.Orders.Where(x => true);
+    }
 }

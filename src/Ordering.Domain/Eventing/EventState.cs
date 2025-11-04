@@ -17,7 +17,6 @@ public enum EventState
     /// The completed
     /// </summary>
     Completed = 2,
-
     /// <summary>
     /// The failed
     /// </summary>

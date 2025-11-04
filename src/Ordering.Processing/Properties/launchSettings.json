@@ -1,15 +1,10 @@
 {
   "profiles": {
     "Ordering.Processing": {
-      "commandName": "Project",
-      "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
-      },
-      "dotnetRunMessages": true
+      "commandName": "Project"
     },
     "Container (Dockerfile)": {
       "commandName": "Docker"
     }
-  },
-  "$schema": "http://json.schemastore.org/launchsettings.json"
+  }
 }

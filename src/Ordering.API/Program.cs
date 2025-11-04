@@ -3,6 +3,7 @@ using Ordering.Application.Extensions;
 using Ordering.Messaging.RabbitMq.Extensions;
 using Ordering.Persistance.Extensions;
 using Ordering.Persistance.Postgres.Extensions;
+using Ordering.Processing;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,7 @@ builder.Services.AddSwaggerGen();
 builder.Services
     .RegisterApiDependencies()
     .RegisterPersistancecDependencies()
+    .AddWOrker(builder.Configuration)
     .RegisterMessagingRabbitMqDependencies(builder.Configuration)
     .RegisterApplicationDependencies(builder.Configuration)
     .RegisterPostgresDependencies(builder.Configuration);

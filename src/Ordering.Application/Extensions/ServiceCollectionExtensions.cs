@@ -23,8 +23,9 @@ namespace Ordering.Application.Extensions
         public static IServiceCollection RegisterApplicationDependencies(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddTransient<IOrderingService, OrderingService>();
+            services.AddTransient<IWarehouseService, DummyWarehouseService>();
             services.AddTransient<IEventPublishingService, EventPublishingService>();
-
+            
             services.AddCortexMediator(
                 configuration,
                 new[] { typeof(ServiceCollectionExtensions) }, // Assemblies to scan for handlers

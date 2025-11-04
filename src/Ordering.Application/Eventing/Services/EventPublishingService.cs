@@ -33,7 +33,7 @@ public class EventPublishingService : IEventPublishingService
     }
     public async Task AddEvent(OutboxEvent outboxEvent)
     {
-        IDbContextTransaction? transaction = _dbContext.UnitOfWork.GetContextTransaction();
+        IDbContextTransaction transaction = _dbContext.UnitOfWork.GetContextTransaction()!;
         await _eventStreamingService.SaveEventAsync(outboxEvent, transaction);
     }
 
@@ -48,7 +48,7 @@ public class EventPublishingService : IEventPublishingService
             try
             {
                 await _eventStreamingService.PropageEvent(@event.Id, EventState.InProgress);
-                await _messageService.PublishAsync(new CreateOrderMessage(@event.OrderId));
+                await _messageService.PublishAsync(new CreateOrderMessage(@event.OrderId, @event.Id));
                 await _eventStreamingService.PropageEvent(@event.Id, EventState.Completed);
             }
             catch (Exception ex)

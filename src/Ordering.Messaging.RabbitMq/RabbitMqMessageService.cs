@@ -11,13 +11,13 @@ namespace Ordering.Messaging.RabbitMq;
 /// </summary>
 /// <seealso cref="Ordering.Domain.Messaging.Services.IMessageService&lt;Ordering.Domain.Messaging.Messages.CreateOrderMessage&gt;" />
 /// <seealso cref="MassTransit.IConsumer&lt;Ordering.Domain.Messaging.Messages.CreateOrderMessage&gt;" />
-internal class RabbitMqMessageService : IMessageService<CreateOrderMessage>, IConsumer<CreateOrderMessage>
+public class RabbitMqMessageService : IMessageService<CreateOrderMessage>
 {
     private readonly ILogger<RabbitMqMessageService> _logger;
     private readonly IBus _bus;
     private readonly RabbitMqConfiguration _rabbitMqConfiguration;
 
-    public const string QueueName = "/create-order-command";
+    public const string QueueName = "create-order-command";
     private Uri _endpoint;
 
     /// <summary>
@@ -39,20 +39,11 @@ internal class RabbitMqMessageService : IMessageService<CreateOrderMessage>, ICo
     public async Task PublishAsync(CreateOrderMessage message)
     {
         ArgumentNullException.ThrowIfNull(message);
-        
+
+        _logger.LogInformation("Start publishing message to queue with id {MessageId} for order: {OrderId}", message.Id, message.OrderId);
         ISendEndpoint endpoint = await _bus.GetSendEndpoint(_endpoint);
         await endpoint.Send(message);
-    }
-
-    public async Task Consume(ConsumeContext<CreateOrderMessage> context)
-    {
-        await ConsumeAsync(context.Message);
-    }
-
-    public Task ConsumeAsync(CreateOrderMessage message)
-    {
-        _logger.LogInformation("New message recieved {@Message}", message);
-        return Task.CompletedTask;
+        _logger.LogInformation("End sending message successfully to queue with id {MessageId} for order: {OrderId}", message.Id, message.OrderId);
     }
 
     protected Uri BuildConnectionUri()
