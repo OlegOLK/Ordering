@@ -1,16 +1,18 @@
 using HealthChecks.UI.Client;
+using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using Ordering.API.Extensions;
 using Ordering.Application.Extensions;
 using Ordering.Messaging.RabbitMq.Extensions;
 using Ordering.Persistance.Extensions;
+using Ordering.Persistance.Postgres;
 using Ordering.Persistance.Postgres.Extensions;
 using Ordering.Processing.Extensions;
 using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Configuration.AddUserSecrets<Program>();
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -72,6 +74,14 @@ app.Lifetime.ApplicationStopping.Register(() =>
 {
     app.Logger.LogWarning("Application is shuting down in 15 seconds. Finalizing working.");
     Thread.Sleep(15000); // Gracefull shutdown, can be fencier but let it be.
+});
+
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    using var scope = app.Services.CreateScope();
+    OrderContext ctx = scope.ServiceProvider.GetRequiredService<OrderContext>();
+    ctx.Database.EnsureCreated();
+    ctx.Database.Migrate();
 });
 
 app.Run();

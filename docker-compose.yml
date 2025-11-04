@@ -1,0 +1,66 @@
+version: '3.9'
+
+services:
+  ordering.api:
+    image: ${DOCKER_REGISTRY-}orderingapi
+    build:
+      context: .
+      dockerfile: src/Ordering.API/Dockerfile
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      RabbitMq__Host: rabbitmq://rabbitmq/
+      RabbitMq__Name: guest
+      RabbitMq__Password: guest
+      PosgresDb__ConnectionString: "Host=postgres;Port=5432;Database=appdb;Username=appuser;Password=secret"
+    networks:
+      - app-network
+
+  rabbitmq:
+     image: rabbitmq:3.13-management
+     container_name: rabbitmq
+     hostname: rabbitmq
+     ports:
+       - "5672:5672"      # Broker
+       - "15672:15672"    # Management UI (http://localhost:15672)
+     environment:
+       RABBITMQ_DEFAULT_USER: guest
+       RABBITMQ_DEFAULT_PASS: guest
+     networks:
+       - app-network
+     healthcheck:
+       test: ["CMD", "rabbitmq-diagnostics", "ping"]
+       interval: 10s
+       timeout: 5s
+       retries: 5
+  
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: appdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

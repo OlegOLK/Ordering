@@ -1,10 +1,8 @@
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Ordering.Domain.Messaging.Messages;
 using Ordering.Domain.Messaging.Services;
-using RabbitMQ.Client;
 
 namespace Ordering.Messaging.RabbitMq.Extensions;
 
@@ -51,7 +49,7 @@ public static class ServiceCollectionExtensions
 
             x.UsingRabbitMq((context, cfg) =>
             {
-                cfg.Host(rabbitMqConfiguration!.Host, h =>
+                cfg.Host(rabbitMqConfiguration!.Host,"/", h =>
                 {
                     h.Username(rabbitMqConfiguration!.Name);
                     h.Password(rabbitMqConfiguration!.Password);
